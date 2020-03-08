@@ -1,0 +1,53 @@
+{
+    "name": "guren-tree",
+    "version": "0.0.1",
+    "description": "A sci-fi menu overlay for react",
+    "main": "build/index.js",
+    "module": "build/index.es.js",
+    "jsnext:main": "build/index.es.js",
+    "keywords": [
+        "react"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@babel/core": "^7.8.6",
+        "@storybook/react": "^5.3.14",
+        "@types/jest": "^24.0.24",
+        "@types/react-dom": "^16.9.5",
+        "awesome-typescript-loader": "^5.2.1",
+        "babel-loader": "^8.0.6",
+        "jest": "^24.9.0",
+        "prettier": "^1.19.1",
+        "rollup": "^1.27.13",
+        "rollup-plugin-commonjs": "^10.1.0",
+        "rollup-plugin-node-resolve": "^5.2.0",
+        "rollup-plugin-peer-deps-external": "^2.2.0",
+        "rollup-plugin-typescript2": "^0.25.3",
+        "ts-jest": "^24.2.0",
+        "typescript": "^3.7.3"
+    },
+    "jest": {
+        "preset": "ts-jest",
+        "testEnvironment": "node"
+    },
+    "standard": {
+        "ignore": [
+            "node_modules/",
+            "build/"
+        ]
+    },
+    "scripts": {
+        "build": "rollup -c",
+        "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+        "test": "jest --coverage",
+        "storybook": "start-storybook"
+    },
+    "peerDependencies": {
+        "react": "^16",
+        "react-dom": "^16"
+    },
+    "dependencies": {
+        "react-jss": "^10.0.4"
+    }
+}
