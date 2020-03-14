@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { createUseStyles } from "react-jss";
+import React, {useEffect, useState, useCallback} from "react";
+import {createUseStyles} from "react-jss";
 
 import {
     anchors,
@@ -14,11 +14,11 @@ import {
     GurenTreeItemModel,
     hex2rgba
 } from "../util";
-import { useDimensions, DimensionsObject } from "../use-dimensions";
-import { useCountTo } from "../use-count-to";
+import {useDimensions, DimensionsObject} from "../use-dimensions";
+import {useCountTo} from "../use-count-to";
 
-import { GurenTreeItem } from "./guren-tree-item";
-import { SvgStroke200 } from "./drawing";
+import {GurenTreeItem} from "./guren-tree-item";
+import {SvgStroke200} from "./drawing";
 
 const addPositions = (a: Position, b: Position): Position => ({
     x: a.x + b.x,
@@ -39,7 +39,7 @@ const useStyles = createUseStyles({
         top: 0,
         bottom: 0
     },
-    container: ({ modalBackdropColor }: GurenTreeStyles) => ({
+    container: ({modalBackdropColor}: GurenTreeStyles) => ({
         composes: "$positioned",
         backgroundColor: modalBackdropColor,
         zIndex: "1000",
@@ -57,7 +57,7 @@ const useStyles = createUseStyles({
         height: "100%",
         zIndex: "1000"
     },
-    originDot: ({ primaryColor, secondaryColor }: GurenTreeStyles) => ({
+    originDot: ({primaryColor, secondaryColor}: GurenTreeStyles) => ({
         stroke: secondaryColor,
         fill: primaryColor,
         strokeWidth: "5",
@@ -66,7 +66,7 @@ const useStyles = createUseStyles({
             r: 15
         }
     }),
-    originLine: ({ secondaryColor }: GurenTreeStyles) => ({
+    originLine: ({secondaryColor}: GurenTreeStyles) => ({
         fill: hex2rgba(secondaryColor, 0.2),
         stroke: secondaryColor,
         strokeWidth: 4
@@ -92,9 +92,9 @@ const GurenTreeContainer = (props: GurenTreeProps) => {
     const center =
         "width" in containerRect
             ? {
-                  x: containerRect.width / 2,
-                  y: containerRect.height / 2
-              }
+                x: containerRect.width / 2,
+                y: containerRect.height / 2
+            }
             : undefined;
 
     return (
@@ -115,13 +115,13 @@ type GurenTreeLayerProps = GurenTreeProps & {
     containerRect: DimensionsObject;
 };
 
-type ClickOrigin = { type: "ClickOrigin"; pos: Position; centerAnchor: Anchor };
+type ClickOrigin = {type: "ClickOrigin"; pos: Position; centerAnchor: Anchor};
 type CenterItemNodes = {
     [key in Anchor]:
-        | GurenTreeItemModelPlaceholder
-        | GurenTreeItemModel
-        | ClickOrigin
-        | void;
+    | GurenTreeItemModelPlaceholder
+    | GurenTreeItemModel
+    | ClickOrigin
+    | void;
 };
 
 const centerItemNodesAppendClickOriginNode = ({
@@ -216,7 +216,7 @@ const centerItemNodesAppendChildItems = ({
         );
     }
 
-    const newCenterItemNodes = { ...centerItemNodes };
+    const newCenterItemNodes = {...centerItemNodes};
     childItems.forEach((childItem: MenuAction, index) => {
         if (centerItemFreeAnchors.length <= index) {
             return;
@@ -239,7 +239,7 @@ const centerItemNodesAppendChildItems = ({
 
 const generateEmptyCenterItemNodes = (): CenterItemNodes =>
     anchors.reduce(
-        (obj, curr) => ({ ...obj, [curr]: undefined }),
+        (obj, curr) => ({...obj, [curr]: undefined}),
         {}
     ) as CenterItemNodes;
 
@@ -313,7 +313,7 @@ export const GurenTreeLayer = ({
                 console.warn(`Non-existing item of anchor ${anchor} selected.`);
             } else if ("menuAction" in item) {
                 if (item.menuAction.onSelect) {
-                    item.menuAction.onSelect(event, { onCloseMenu: onClose });
+                    item.menuAction.onSelect(event, {onCloseMenu: onClose});
                 }
             } else if (item.type === "ClickOrigin") {
                 // user selected the anchor that is connected to the back-circle
@@ -330,12 +330,6 @@ export const GurenTreeLayer = ({
     });
 
     const [show, setShow] = useState(false);
-    const itemAnimationDelay = 75;
-    const itemAnimCounter = useCountTo({
-        max: actions.length,
-        delay: show ? itemAnimationDelay : null
-    });
-
     useEffect(() => {
         // Makes it so that it renders again, this time starting animations
         setShow(true);
@@ -343,11 +337,18 @@ export const GurenTreeLayer = ({
 
     const sortedAnchors = arrayRotate(
         [...activeAnchors],
-        anchors.indexOf(clickOriginAnchor)
+        (activeAnchors as Anchor[]).indexOf(clickOriginAnchor)
     );
 
+    const itemAnimationDelay = 75;
+    const itemAnimCounter = useCountTo({
+        max: actions.length + 1,
+        delay: show && (!origin || clickOriginAnchor) ? itemAnimationDelay : null
+    });
     useEffect(() => {
-        const activationAnchor = sortedAnchors[itemAnimCounter];
+        // Offset anim counter so that it has time to create the
+        // `clickOriginAnchor` before animating items in.
+        const activationAnchor = sortedAnchors[itemAnimCounter - 1];
         if (activationAnchor) {
             setCenterItemNodes((nodes: CenterItemNodes) => {
                 return {
@@ -373,7 +374,7 @@ export const GurenTreeLayer = ({
             )}
             <GurenTreeItem
                 visible
-                styles={{ secondaryColor: styles.secondaryColor }}
+                styles={{secondaryColor: styles.secondaryColor}}
                 activeCorners={{
                     topLeft: true,
                     topRight: true,
@@ -384,7 +385,7 @@ export const GurenTreeLayer = ({
                 menuAction={centerItemModel.menuAction}
                 onClick={event =>
                     centerAction.onSelect &&
-                    centerAction.onSelect(event, { onCloseMenu: onClose })
+                    centerAction.onSelect(event, {onCloseMenu: onClose})
                 }
                 onUpdateDimensions={setCenterItemModel}
             >
@@ -532,7 +533,7 @@ const GurenTreeLayerItemConnect = ({
                                         centerItemToClickOriginAnchor
                                     ].pos
                                 ),
-                                { x: -window.scrollX, y: 0 }
+                                {x: -window.scrollX, y: 0}
                             )
                         ]}
                         color={styles.secondaryColor}
@@ -623,8 +624,8 @@ const useTreeShortcuts = ({
                 case "s":
                     onCenterItemSelect
                         ? onCenterItemSelect(event, {
-                              onCloseMenu: onClose
-                          })
+                            onCloseMenu: onClose
+                        })
                         : onClose();
                     break;
                 case "q":
