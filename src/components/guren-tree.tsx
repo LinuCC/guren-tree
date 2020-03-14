@@ -302,7 +302,7 @@ export const GurenTreeLayer = ({
     );
 
     const onItemSelect = useCallback(
-        (anchor: Anchor) => {
+        (anchor: Anchor, event: any) => {
             const item:
                 | GurenTreeItemModelPlaceholder
                 | GurenTreeItemModel
@@ -603,7 +603,7 @@ const useTreeShortcuts = ({
     onCenterItemSelect,
     onClose
 }: {
-    onDirectionSelect: (anchor: Anchor) => void;
+    onDirectionSelect: (anchor: Anchor, event: any) => void;
     onCenterItemSelect?: (
         event: any,
         options: {
@@ -653,7 +653,7 @@ const useTreeShortcuts = ({
                     break;
             }
 
-            anchor && onDirectionSelect(anchor);
+            anchor && onDirectionSelect(anchor, event);
         },
         [onClose, onDirectionSelect]
     );
