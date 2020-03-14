@@ -1,11 +1,11 @@
-import React, {useEffect, useState, useCallback} from "react";
-import {createUseStyles} from "react-jss";
+import React, { useEffect, useState, useCallback } from "react";
+import { createUseStyles } from "react-jss";
 
 import {
     anchors,
     anchors6,
     get4WayDirection,
-    // get6WayDirection,
+    get6WayDirection,
     arrayRotate,
     MenuAction,
     Position,
@@ -14,16 +14,16 @@ import {
     GurenTreeItemModel,
     hex2rgba
 } from "../util";
-import {useDimensions, DimensionsObject} from "../use-dimensions";
-import {useCountTo} from "../use-count-to";
+import { useDimensions, DimensionsObject } from "../use-dimensions";
+import { useCountTo } from "../use-count-to";
 
-import {GurenTreeItem} from "./guren-tree-item";
-// import {SvgStroke200} from "./drawing";
+import { GurenTreeItem } from "./guren-tree-item";
+import { SvgStroke200 } from "./drawing";
 
-// const addPositions = (a: Position, b: Position): Position => ({
-//     x: a.x + b.x,
-//     y: a.y + b.y
-// });
+const addPositions = (a: Position, b: Position): Position => ({
+    x: a.x + b.x,
+    y: a.y + b.y
+});
 
 type GurenTreeStyles = {
     primaryColor: string;
@@ -39,7 +39,7 @@ const useStyles = createUseStyles({
         top: 0,
         bottom: 0
     },
-    container: ({modalBackdropColor}: GurenTreeStyles) => ({
+    container: ({ modalBackdropColor }: GurenTreeStyles) => ({
         composes: "$positioned",
         backgroundColor: modalBackdropColor,
         zIndex: "1000",
@@ -57,7 +57,7 @@ const useStyles = createUseStyles({
         height: "100%",
         zIndex: "1000"
     },
-    originDot: ({primaryColor, secondaryColor}: GurenTreeStyles) => ({
+    originDot: ({ primaryColor, secondaryColor }: GurenTreeStyles) => ({
         stroke: secondaryColor,
         fill: primaryColor,
         strokeWidth: "5",
@@ -66,7 +66,7 @@ const useStyles = createUseStyles({
             r: 15
         }
     }),
-    originLine: ({secondaryColor}: GurenTreeStyles) => ({
+    originLine: ({ secondaryColor }: GurenTreeStyles) => ({
         fill: hex2rgba(secondaryColor, 0.2),
         stroke: secondaryColor,
         strokeWidth: 4
@@ -92,9 +92,9 @@ const GurenTreeContainer = (props: GurenTreeProps) => {
     const center =
         "width" in containerRect
             ? {
-                x: containerRect.width / 2,
-                y: containerRect.height / 2
-            }
+                  x: containerRect.width / 2,
+                  y: containerRect.height / 2
+              }
             : undefined;
 
     return (
@@ -115,13 +115,13 @@ type GurenTreeLayerProps = GurenTreeProps & {
     containerRect: DimensionsObject;
 };
 
-type ClickOrigin = {type: "ClickOrigin"; pos: Position; centerAnchor: Anchor};
+type ClickOrigin = { type: "ClickOrigin"; pos: Position; centerAnchor: Anchor };
 type CenterItemNodes = {
     [key in Anchor]:
-    | GurenTreeItemModelPlaceholder
-    | GurenTreeItemModel
-    | ClickOrigin
-    | void;
+        | GurenTreeItemModelPlaceholder
+        | GurenTreeItemModel
+        | ClickOrigin
+        | void;
 };
 
 const centerItemNodesAppendClickOriginNode = ({
@@ -216,7 +216,7 @@ const centerItemNodesAppendChildItems = ({
         );
     }
 
-    const newCenterItemNodes = {...centerItemNodes};
+    const newCenterItemNodes = { ...centerItemNodes };
     childItems.forEach((childItem: MenuAction, index) => {
         if (centerItemFreeAnchors.length <= index) {
             return;
@@ -239,7 +239,7 @@ const centerItemNodesAppendChildItems = ({
 
 const generateEmptyCenterItemNodes = (): CenterItemNodes =>
     anchors.reduce(
-        (obj, curr) => ({...obj, [curr]: undefined}),
+        (obj, curr) => ({ ...obj, [curr]: undefined }),
         {}
     ) as CenterItemNodes;
 
@@ -252,14 +252,7 @@ export const GurenTreeLayer = ({
     styles,
 
     center
-}: // containerRect
-    GurenTreeLayerProps) => {
-    // TODO rename to centerItem
-    // const [
-    //     rootOptionAnchors,
-    //     setRootOptionAnchors
-    // ] = useState<GurenTreeItemModel | null>(null);
-
+}: GurenTreeLayerProps) => {
     const activeAnchors = [...anchors6];
     const [centerItemModel, setCenterItemModel] = useState<
         GurenTreeItemModel | GurenTreeItemModelPlaceholder
@@ -268,32 +261,27 @@ export const GurenTreeLayer = ({
         menuAction: centerAction,
         origin
     });
-    console.log(centerItemModel);
     const [centerItemNodes, setCenterItemNodes] = useState<CenterItemNodes>(
         generateEmptyCenterItemNodes()
     );
     const [clickOriginAnchor, setClickOriginAnchor] = useState<Anchor>(
         activeAnchors[0]
     );
-    // const [childItemsPositions, setTreeItemsPositions] = useState<GurenTreeItemModel[]>(
-    //     []
-    // );
-    // const classes = useStyles(styles);
 
     useEffect(() => {
         /// Triggers complete rerendering & recalculation of items & positions
-        setClickOriginAnchor(
-            getClickOriginAnchor({
-                itemNodes: centerItemNodes
-            }) || activeAnchors[0]
-        );
-
         let newCenterItemNodes: CenterItemNodes = generateEmptyCenterItemNodes();
         newCenterItemNodes = centerItemNodesAppendClickOriginNode({
             centerItemNodes: newCenterItemNodes,
             containerCenter: center,
             originPos: origin
         });
+        setClickOriginAnchor(
+            getClickOriginAnchor({
+                itemNodes: newCenterItemNodes
+            }) || activeAnchors[0]
+        );
+
         newCenterItemNodes = centerItemNodesAppendChildItems({
             activeAnchors,
             centerItemNodes: newCenterItemNodes,
@@ -302,9 +290,6 @@ export const GurenTreeLayer = ({
         });
         setCenterItemNodes(newCenterItemNodes);
     }, []);
-
-    // const childItemsPositionsRef = useRef(childItemsPositions);
-    // childItemsPositionsRef.current = childItemsPositions;
 
     const updateChildItemModel = useCallback(
         (centerItemAnchor: Anchor) => (model: GurenTreeItemModel) => {
@@ -315,22 +300,6 @@ export const GurenTreeLayer = ({
         },
         [setCenterItemNodes, centerItemNodes]
     );
-
-    // const originIndex: number | void =
-    //     clickOrigin && anchors.indexOf(clickOrigin.centerAnchor);
-    // const freeAnchors: Anchor[] = useMemo(
-    //     () =>
-    //         originIndex !== -1 && originIndex !== undefined
-    //             ? arrayRotate(
-    //                 [
-    //                     ...anchors.slice(0, originIndex),
-    //                     ...anchors.slice(originIndex + 1)
-    //                 ],
-    //                 originIndex
-    //             )
-    //             : [...anchors],
-    //     [originIndex]
-    // );
 
     const onItemSelect = useCallback(
         (anchor: Anchor) => {
@@ -344,7 +313,7 @@ export const GurenTreeLayer = ({
                 console.warn(`Non-existing item of anchor ${anchor} selected.`);
             } else if ("menuAction" in item) {
                 if (item.menuAction.onSelect) {
-                    item.menuAction.onSelect(event, {onCloseMenu: onClose});
+                    item.menuAction.onSelect(event, { onCloseMenu: onClose });
                 }
             } else if (item.type === "ClickOrigin") {
                 // user selected the anchor that is connected to the back-circle
@@ -374,108 +343,48 @@ export const GurenTreeLayer = ({
 
     const sortedAnchors = arrayRotate(
         [...anchors],
-        // First anchor after origin anchor
-        anchors.indexOf(clickOriginAnchor) + 1 < anchors.length ?
-            anchors.indexOf(clickOriginAnchor) + 1 : 0
+        anchors.indexOf(clickOriginAnchor)
     );
-
-    console.info('Ty', centerItemNodes);
-    console.info('aslkdj', sortedAnchors);
-
-    // ZA WARUDO
-    // {clickOrigin, centerItem, childItems, onClose}
-
-    // const clickOrigin = origin;
-    // const clickOriginAnchorToCenter = origin;
-    // const centerItem: GurenTreeItemModel = rootOptionAnchors;
-    // const childItems: {[Anchor]: GurenTreeItemModel} = childItemsPositions;
 
     return (
         <>
-            {/*<svg className={classes.originContainer} onClick={onClose}>
-                {
-                    rootOptionAnchors !== null &&
-                    originToRootAnchor !== undefined &&
-                    !isNaN(rootOptionAnchors.anchors[originToRootAnchor].pos.x) &&
-                    !isNaN(rootOptionAnchors.anchors[originToRootAnchor].pos.y) && (
-                        <SvgStroke200
-                            stops={[
-                                origin,
-                                {
-                                    x:
-                                        center.x +
-                                        rootOptionAnchors.anchors[originToRootAnchor].pos
-                                            .x -
-                                        window.scrollX,
-                                    y:
-                                        center.y +
-                                        rootOptionAnchors.anchors[originToRootAnchor].pos.y
-                                }
-                            ]}
-                            color={styles.secondaryColor}
-                        />
-                    )}
-                {
-                    childItemsPositions &&
-                    rootOptionAnchors &&
-                    childItemsPositions.map(
-                        (anchor: GurenTreeItemModel, _index: number) => {
-                            const anchorToCenterDir = get6WayDirection(
-                                center,
-                                anchor.origin
-                            );
-                            const fromPos = addPositions(
-                                rootOptionAnchors.origin,
-                                rootOptionAnchors.anchors[anchorToCenterDir].pos
-                            );
-                            const centerToAnchorDir = get6WayDirection(
-                                anchor.origin,
-                                center
-                            );
-                            const toPos = addPositions(
-                                anchor.origin,
-                                anchor.anchors[centerToAnchorDir]
-                            );
-                            return (
-                                <SvgStroke200
-                                    stops={[fromPos, toPos]}
-                                    color={styles.secondaryColor}
-                                />
-                            );
-                        }
-                    )}
-                <circle
-                    r={8}
-                    className={classes.originDot}
-                    cx={origin.x}
-                    cy={origin.y}
-                    onClick={onClose}
+            {centerItemModel.type === "GurenTreeItemModel" && (
+                <GurenTreeLayerItemConnect
+                    centerItem={centerItemModel}
+                    centerItemNodes={centerItemNodes}
+                    styles={styles}
+                    onClose={onClose}
                 />
-                </svg>*/}
-            {
-                <GurenTreeItem
-                    styles={{secondaryColor: styles.secondaryColor}}
-                    activeCorners={{
-                        topLeft: true,
-                        topRight: true,
-                        bottomLeft: true,
-                        bottomRight: true
-                    }}
-                    origin={center}
-                    menuAction={centerItemModel.menuAction}
-                    onClick={event =>
-                        centerAction.onSelect &&
-                        centerAction.onSelect(event, {onCloseMenu: onClose})
-                    }
-                    onUpdateDimensions={setCenterItemModel}
-                >
-                    {centerAction.node}
-                </GurenTreeItem>
-            }
+            )}
+            <GurenTreeItem
+                visible
+                styles={{ secondaryColor: styles.secondaryColor }}
+                activeCorners={{
+                    topLeft: true,
+                    topRight: true,
+                    bottomLeft: true,
+                    bottomRight: true
+                }}
+                origin={center}
+                menuAction={centerItemModel.menuAction}
+                onClick={event =>
+                    centerAction.onSelect &&
+                    centerAction.onSelect(event, { onCloseMenu: onClose })
+                }
+                onUpdateDimensions={setCenterItemModel}
+            >
+                {centerAction.node}
+            </GurenTreeItem>
             {sortedAnchors
-                .filter((anchor: Anchor) => !!centerItemNodes[anchor])
-                .slice(0, itemAnimCounter)
-                .map((anchor: Anchor) => {
+                .filter((anchor: Anchor) => {
+                    const item = centerItemNodes[anchor];
+                    return (
+                        !!item &&
+                        (item.type === "GurenTreeItemModel" ||
+                            item.type === "GurenTreeItemModelPlaceholder")
+                    );
+                })
+                .map((anchor: Anchor, index: number) => {
                     const item = centerItemNodes[anchor];
                     if (
                         item &&
@@ -496,6 +405,7 @@ export const GurenTreeLayer = ({
                                 }}
                                 origin={item.origin}
                                 menuAction={item.menuAction}
+                                visible={itemAnimCounter > index}
                                 onClick={event =>
                                     item.menuAction.onSelect &&
                                     item.menuAction.onSelect(event, {
@@ -512,108 +422,105 @@ export const GurenTreeLayer = ({
                     }
                     return null;
                 })}
-            {/*clickOrigin !== undefined && rootOptionAnchors !== null &&
-                actions.slice(0, itemAnimCounter).map((option, index) => {
-                    const anchor = freeAnchors.filter<Anchor>(
-                        (a): a is Anchor => a !== clickOrigin.centerAnchor
-                    )[index];
-                    return (
-                        <GurenTreeItem
-                            key={anchor}
-                            styles={{secondaryColor: styles.secondaryColor}}
-                            activeCorners={{
-                                topLeft: true,
-                                topRight: true,
-                                bottomLeft: true,
-                                bottomRight: true
-                            }}
-                            origin={moveTreeChildRelativeToParent({
-                                anchorParentToChild: anchor,
-                                parentPosition: rootOptionAnchors.origin
-                            })}
-                            onClick={event =>
-                                option.onSelect &&
-                                option.onSelect(event, {onCloseMenu: onClose})
-                            }
-                            onUpdateDimensions={updateChildItemModel(index)}
-                        >
-                            {option.node}
-                        </GurenTreeItem>
-                    );
-                })*/}
         </>
     );
 };
 
-// type GurenTreeLayerItemConnectProps = {
-//     clickOrigin?: Position, centerItem: GurenTreeItemModel, childItems:
-//     Array<GurenTreeItemModel>, onClose: () => void
-// };
+type GurenTreeLayerItemConnectProps = {
+    clickOrigin?: Position;
+    centerItem: GurenTreeItemModel;
+    centerItemNodes: CenterItemNodes;
+    styles: GurenTreeStyles;
+    onClose: () => void;
+};
 
-// const GurenTreeLayerItemConnect = ({clickOrigin, centerItem, childItems, onClose}: GurenTreeLayerItemConnectProps) => {
-//     const classes = useStyles();
-//
-//     return <svg className={classes.originContainer} onClick={onClose}>
-//         {
-//             rootOptionAnchors !== null &&
-//             originToRootAnchor !== undefined &&
-//             !isNaN(rootOptionAnchors[originToRootAnchor].pos.x) &&
-//             !isNaN(rootOptionAnchors[originToRootAnchor].pos.y) && (
-//                 <SvgStroke200
-//                     stops={[
-//                         origin,
-//                         {
-//                             x:
-//                                 center.x +
-//                                 rootOptionAnchors[originToRootAnchor]
-//                                     .pos.x -
-//                                 window.scrollX,
-//                             y:
-//                                 center.y +
-//                                 rootOptionAnchors[originToRootAnchor].pos.y
-//                         }
-//                     ]}
-//                     color={styles.secondaryColor}
-//                 />
-//             )}
-//         {
-//             childItemsPositions &&
-//             rootOptionAnchors &&
-//             childItemsPositions.map(
-//                 (anchor: GurenTreeItemModel, _index: number) => {
-//                     const anchorToCenterDir = get6WayDirection(
-//                         center,
-//                         anchor.origin
-//                     );
-//                     const fromPos = addPositions(
-//                         rootOptionAnchors.origin,
-//                         rootOptionAnchors[anchorToCenterDir].pos
-//                     );
-//                     const centerToAnchorDir = get6WayDirection(
-//                         anchor.origin,
-//                         center
-//                     );
-//                     const toPos = addPositions(
-//                         anchor.origin,
-//                         anchor[centerToAnchorDir]
-//                     );
-//                     return (
-//                         <SvgStroke200
-//                             stops={[fromPos, toPos]}
-//                             color={styles.secondaryColor}
-//                         />
-//                     );
-//                 }
-//             )}
-//         <circle
-//             r={8}
-//             className={classes.originDot}
-//             cx={origin.x}
-//             cy={origin.y}
-//             onClick={onClose}
-//         />
-//     </svg>
-// };
+const GurenTreeLayerItemConnect = ({
+    clickOrigin,
+    centerItem,
+    centerItemNodes,
+    styles,
+    onClose
+}: GurenTreeLayerItemConnectProps) => {
+    const classes = useStyles(styles);
+
+    const centerItemToClickOriginAnchor =
+        clickOrigin && get4WayDirection(centerItem.origin, clickOrigin);
+
+    return (
+        <svg className={classes.originContainer} onClick={onClose}>
+            {Object.entries(centerItemNodes).map(([anchor, value]) => {
+                if (value === undefined) {
+                    return null;
+                }
+                switch (value.type) {
+                    case "ClickOrigin":
+                        const clickOrigin = value;
+                        return (
+                            <>
+                                <SvgStroke200
+                                    stops={[
+                                        clickOrigin.pos,
+                                        addPositions(
+                                            centerItem.origin,
+                                            centerItem.anchors[anchor].pos
+                                        )
+                                    ]}
+                                    color={styles.secondaryColor}
+                                />
+                                <circle
+                                    r={8}
+                                    className={classes.originDot}
+                                    cx={clickOrigin.pos.x}
+                                    cy={clickOrigin.pos.y}
+                                />
+                            </>
+                        );
+                    case "GurenTreeItemModel":
+                        const treeItem = value;
+                        const anchorToCenterDir = get6WayDirection(
+                            treeItem.origin,
+                            centerItem.origin
+                        );
+                        const fromPos = addPositions(
+                            treeItem.origin,
+                            treeItem.anchors[anchorToCenterDir].pos
+                        );
+                        const toPos = addPositions(
+                            centerItem.origin,
+                            centerItem.anchors[anchor].pos
+                        );
+                        return (
+                            <SvgStroke200
+                                key={anchor}
+                                stops={[fromPos, toPos]}
+                                color={styles.secondaryColor}
+                            />
+                        );
+                    case "GurenTreeItemModelPlaceholder":
+                        return null;
+                }
+            })}
+            {centerItemToClickOriginAnchor !== undefined &&
+                clickOrigin !== undefined && (
+                    <SvgStroke200
+                        stops={[
+                            clickOrigin,
+                            addPositions(
+                                addPositions(
+                                    centerItem.origin,
+                                    centerItem.anchors[
+                                        centerItemToClickOriginAnchor
+                                    ].pos
+                                ),
+                                { x: -window.scrollX, y: 0 }
+                            )
+                        ]}
+                        color={styles.secondaryColor}
+                    />
+                )}
+        </svg>
+    );
+};
 
 const moveTreeChildRelativeToParent = ({
     anchorParentToChild,
@@ -622,10 +529,6 @@ const moveTreeChildRelativeToParent = ({
     anchorParentToChild: Anchor;
     parentPosition: Position;
 }) => {
-    // const anchorParentToChild = freeAnchors.filter(
-    //     (a: any) => a !== originToRootAnchor
-    // )[index]
-
     switch (anchorParentToChild) {
         case "topLeft":
             return {

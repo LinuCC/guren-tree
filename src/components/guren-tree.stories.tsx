@@ -256,6 +256,85 @@ export const keyboardShortcuts = () => {
     );
 };
 
+export const hugeScrollableContainer = () => {
+    const [origin, setOrigin] = useState<{ x: number; y: number } | void>();
+
+    const showMenu = (event: any) =>
+        setOrigin({
+            x: event.clientX,
+            y: event.clientY
+        });
+
+    return (
+        <div>
+            <button style={{ height: 5000, width: 5000 }} onClick={showMenu}>
+                Show Menu
+            </button>
+
+            {origin && (
+                <GurenTree
+                    origin={origin}
+                    centerAction={{
+                        node: (
+                            <NodeText>
+                                Breached the firewall!
+                                <br />
+                                Whats your next choice?
+                            </NodeText>
+                        ),
+                        onSelect: () => alert("Select a choice plox")
+                    }}
+                    actions={[
+                        {
+                            node: <NodeText>Enter Mainframe</NodeText>,
+                            onSelect: () => alert("We are in!")
+                        },
+                        {
+                            node: <NodeText>Sniff around</NodeText>,
+                            onSelect: () => alert("Sneaky Sneaky")
+                        },
+                        {
+                            node: (
+                                <NodeText>
+                                    <ul>
+                                        <li>Get Hoodie</li>
+                                        <li>Get Guy Fawkes mask</li>
+                                        <li>Sell data to highest bidder</li>
+                                    </ul>
+                                </NodeText>
+                            ),
+                            onSelect: () => alert("Hackz0r")
+                        },
+                        {
+                            node: (
+                                <div>
+                                    <div>
+                                        <NodeText>Emergency kitten!</NodeText>
+                                    </div>
+                                    <img src="https://placekitten.com/201/201" />
+                                </div>
+                            ),
+                            onSelect: () => alert("Kitten is on the way!")
+                        },
+                        {
+                            node: (
+                                <NodeText>👾 Fight space invaders 👾</NodeText>
+                            ),
+                            onSelect: () => alert("Pew Pew Pew!")
+                        }
+                    ]}
+                    onClose={() => setOrigin()}
+                    styles={{
+                        primaryColor: "#2081a5",
+                        secondaryColor: "#e01073",
+                        modalBackdropColor: "#00000033"
+                    }}
+                />
+            )}
+        </div>
+    );
+};
+
 export const notes = () => (
     <div>
         <ul>
