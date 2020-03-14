@@ -29,7 +29,7 @@ const useGurenTreeItemStyles = createUseStyles({
         "&:hover, &:focus": {
             outline: "none",
             "& $borderPath": {
-                fill: hex2rgba(secondaryColor, 0.8)
+                fill: hex2rgba(secondaryColor, 0.85)
             }
         }
     }),
@@ -44,13 +44,8 @@ const useGurenTreeItemStyles = createUseStyles({
         opacity: 1
     },
     borderPath: ({ secondaryColor }: GurenTreeItemStyles) => ({
-        stroke: secondaryColor,
-        strokeWidth: 4,
         fill: hex2rgba(secondaryColor, 0.75),
-        width: "100%",
-        height: "100%"
-        // minHeight: CORNER_SIZE * 2,
-        // minWidth: 200
+        transition: "fill 0.2s"
     }),
     contentContainer: {
         display: "flex",
@@ -122,6 +117,7 @@ export const GurenTreeItem = memo(
                         rect,
                         origin,
                         menuAction,
+                        visible,
                         anchors: {
                             topLeft: {
                                 active: false,
@@ -262,6 +258,7 @@ export const GurenTreeItem = memo(
                             <SvgStroke200
                                 stops={borderPaths}
                                 color={styles.secondaryColor}
+                                className={classes.borderPath}
                                 closing
                             />
                         )}

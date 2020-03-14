@@ -288,15 +288,15 @@ export const GurenTreeLayer = ({
             childItems: actions,
             centerPosition: center
         });
-        setCenterItemNodes(newCenterItemNodes);
+        setCenterItemNodes(() => newCenterItemNodes);
     }, []);
 
     const updateChildItemModel = useCallback(
         (centerItemAnchor: Anchor) => (model: GurenTreeItemModel) => {
-            setCenterItemNodes({
-                ...centerItemNodes,
+            setCenterItemNodes(nodes => ({
+                ...nodes,
                 [centerItemAnchor]: model
-            });
+            }));
         },
         [setCenterItemNodes, centerItemNodes]
     );
@@ -325,11 +325,11 @@ export const GurenTreeLayer = ({
     );
     useTreeShortcuts({
         onDirectionSelect: onItemSelect,
+        onCenterItemSelect: centerAction.onSelect,
         onClose
     });
 
     const [show, setShow] = useState(false);
-
     const itemAnimationDelay = 75;
     const itemAnimCounter = useCountTo({
         max: actions.length,
@@ -342,9 +342,24 @@ export const GurenTreeLayer = ({
     });
 
     const sortedAnchors = arrayRotate(
-        [...anchors],
+        [...activeAnchors],
         anchors.indexOf(clickOriginAnchor)
     );
+
+    useEffect(() => {
+        const activationAnchor = sortedAnchors[itemAnimCounter];
+        if (activationAnchor) {
+            setCenterItemNodes((nodes: CenterItemNodes) => {
+                return {
+                    ...nodes,
+                    [activationAnchor]: {
+                        ...nodes[activationAnchor],
+                        visible: true
+                    }
+                };
+            });
+        }
+    }, [itemAnimCounter]);
 
     return (
         <>
@@ -376,51 +391,53 @@ export const GurenTreeLayer = ({
                 {centerAction.node}
             </GurenTreeItem>
             {sortedAnchors
-                .filter((anchor: Anchor) => {
-                    const item = centerItemNodes[anchor];
+                .map((anchor: Anchor): [
+                    Anchor,
+                    (
+                        | void
+                        | GurenTreeItemModelPlaceholder
+                        | GurenTreeItemModel
+                        | ClickOrigin
+                    )
+                ] => [anchor, centerItemNodes[anchor]])
+                .filter((value): value is [
+                    Anchor,
+                    GurenTreeItemModel | GurenTreeItemModelPlaceholder
+                ] => {
+                    const [, item] = value;
                     return (
                         !!item &&
                         (item.type === "GurenTreeItemModel" ||
                             item.type === "GurenTreeItemModelPlaceholder")
                     );
                 })
-                .map((anchor: Anchor, index: number) => {
-                    const item = centerItemNodes[anchor];
-                    if (
-                        item &&
-                        (item.type === "GurenTreeItemModel" ||
-                            item.type === "GurenTreeItemModelPlaceholder")
-                    ) {
-                        return (
-                            <GurenTreeItem
-                                key={anchor}
-                                styles={{
-                                    secondaryColor: styles.secondaryColor
-                                }}
-                                activeCorners={{
-                                    topLeft: true,
-                                    topRight: true,
-                                    bottomLeft: true,
-                                    bottomRight: true
-                                }}
-                                origin={item.origin}
-                                menuAction={item.menuAction}
-                                visible={itemAnimCounter > index}
-                                onClick={event =>
-                                    item.menuAction.onSelect &&
-                                    item.menuAction.onSelect(event, {
-                                        onCloseMenu: onClose
-                                    })
-                                }
-                                onUpdateDimensions={updateChildItemModel(
-                                    anchor
-                                )}
-                            >
-                                {item.menuAction.node}
-                            </GurenTreeItem>
-                        );
-                    }
-                    return null;
+                .map(([anchor, item]) => {
+                    return (
+                        <GurenTreeItem
+                            key={anchor}
+                            styles={{
+                                secondaryColor: styles.secondaryColor
+                            }}
+                            activeCorners={{
+                                topLeft: true,
+                                topRight: true,
+                                bottomLeft: true,
+                                bottomRight: true
+                            }}
+                            origin={item.origin}
+                            menuAction={item.menuAction}
+                            visible={"visible" in item && item.visible}
+                            onClick={event =>
+                                item.menuAction.onSelect &&
+                                item.menuAction.onSelect(event, {
+                                    onCloseMenu: onClose
+                                })
+                            }
+                            onUpdateDimensions={updateChildItemModel(anchor)}
+                        >
+                            {item.menuAction.node}
+                        </GurenTreeItem>
+                    );
                 })}
         </>
     );
@@ -477,6 +494,9 @@ const GurenTreeLayerItemConnect = ({
                         );
                     case "GurenTreeItemModel":
                         const treeItem = value;
+                        if (!treeItem.visible) {
+                            return null;
+                        }
                         const anchorToCenterDir = get6WayDirection(
                             treeItem.origin,
                             centerItem.origin
@@ -580,9 +600,16 @@ const moveTreeChildRelativeToParent = ({
 
 const useTreeShortcuts = ({
     onDirectionSelect,
+    onCenterItemSelect,
     onClose
 }: {
     onDirectionSelect: (anchor: Anchor) => void;
+    onCenterItemSelect?: (
+        event: any,
+        options: {
+            onCloseMenu: () => void;
+        }
+    ) => void;
     onClose: () => void;
 }) => {
     const handleKeypress = useCallback(
@@ -590,8 +617,15 @@ const useTreeShortcuts = ({
             let anchor: Anchor | void = undefined;
 
             switch (event.key) {
-                case "x":
+                case "r":
                     onClose();
+                    break;
+                case "s":
+                    onCenterItemSelect
+                        ? onCenterItemSelect(event, {
+                              onCloseMenu: onClose
+                          })
+                        : onClose();
                     break;
                 case "q":
                     anchor = "topLeft";
@@ -603,13 +637,19 @@ const useTreeShortcuts = ({
                     anchor = "topRight";
                     break;
                 case "d":
+                    anchor = "right";
+                    break;
+                case "c":
                     anchor = "bottomRight";
                     break;
-                case "s":
+                case "x":
                     anchor = "bottom";
                     break;
-                case "a":
+                case "z":
                     anchor = "bottomLeft";
+                    break;
+                case "a":
+                    anchor = "left";
                     break;
             }
 

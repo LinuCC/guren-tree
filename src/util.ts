@@ -47,6 +47,7 @@ export type GurenTreeItemModel = {
     anchors: {
         [key in Anchor]: { active: boolean; pos: Position };
     };
+    visible: boolean;
 };
 
 export const get4WayDirection = (

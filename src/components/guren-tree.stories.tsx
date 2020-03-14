@@ -211,8 +211,9 @@ export const keyboardShortcuts = () => {
                     centerAction={{
                         node: (
                             <NodeText>
-                                'X' to close. <br />
-                                'Q' selects nonexisting,
+                                'S' to select this node. <br />
+                                'R' to close. <br />
+                                'Q' selects clicked open knob,
                                 <br />
                                 therefore closing, too.
                             </NodeText>
@@ -230,16 +231,16 @@ export const keyboardShortcuts = () => {
                                 alert("'Upper left option' selected")
                         },
                         {
-                            node: <NodeText>Bottom right option: 'D'</NodeText>,
+                            node: <NodeText>Bottom right option: 'C'</NodeText>,
                             onSelect: () =>
                                 alert("'Bottom right option' selected")
                         },
                         {
-                            node: <NodeText>Bottom option: 'S'</NodeText>,
+                            node: <NodeText>Bottom option: 'X'</NodeText>,
                             onSelect: () => alert("'Bottom option' selected")
                         },
                         {
-                            node: <NodeText>Bottom left option: 'A'</NodeText>,
+                            node: <NodeText>Bottom left option: 'Z'</NodeText>,
                             onSelect: () =>
                                 alert("'Bottom left option' selected")
                         }
